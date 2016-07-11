@@ -5,40 +5,16 @@ use warnings;
 use Data::Dumper;
 use DBI;
 
-##commands used to create sqlite3 tables
-=pod 
-CREATE TABLE organism (
-  organism_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  organism_name VARCHAR(255) NOT NULL
-);
-
-CREATE TABLE location (
-  location_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  start INTEGER NOT NULL,
-  stop INTEGER NOT NULL
-);
-
-CREATE TABLE tissue (
-  tissue_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  tissue VARCHAR(255) NOT NULL 
-);
-
-CREATE TABLE mRNA_expression_level (
-  gene_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  sequence TEXT NOT NULL,  
-  organism_ID INTEGER NOT NULL,  
-  location_ID INTEGER NOT NULL, 
-  tissue_ID INTEGER NOT NULL    
-);
-=cut
-
-my $file = "test.fasta";
+my $file = "data.fasta";
 open( my $IN , '<' , $file ) or die( "Can't open $file ($!)" );
 
-my $dbh = DBI->connect( "DBI:SQLite:dbname=organism" , "" , "" , { PrintError => 0 , RaiseError => 1 } );
+my $dbh = DBI->connect( "DBI:SQLite:dbname=data5.dbl" , "" , "" , { PrintError => 0 , RaiseError => 1 } );
 
-my %seqs;
-my $header;
+$dbh->do( "CREATE TABLE organism ( organism_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, organism_name VARCHAR(255) NOT NULL)" );
+$dbh->do( "CREATE TABLE location ( location_ID 	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, start INTEGER NUT NULL, stop INTEGER NOT NULL)" );
+$dbh->do( "CREATE TABLE tissue ( tissue_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, tissue VARCHAR(255) NOT NULL)" );
+$dbh->do( "CREATE TABLE mRNA_expression_level ( gene_ID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, sequence TEXT NOT NULL, organism_ID INTEGER NOT NULL, location_ID INTEGER NOT NULL, tissue_ID INTEGER NOT NULL)" );
+
 my $seq;
 my @data;
 my $org_id;
@@ -48,13 +24,14 @@ my $tis_id;
 while (<$IN>) {
 
 	my $line = $_;
-    #chomp $line;
 
 	if ( /^>/ ) {
 		if ( $seq ){
-			$dbh->do( "INSERT INTO organism VALUES( ? , ? )" , undef , $data[1] );
-			my $sth = $dbh->prepare( "SELECT organism_ID FROM organism WHERE organism_name = $data[1]" );
-			$sth->execute();
+			my $sth = $dbh->do( "INSERT INTO organism(organism_name) VALUES (?) ");
+			$sth->execute( $data[1]);
+			my $cmd = "SELECT organism_ID FROM organism WHERE ORGANISM_NAME = ? ";
+			$sth = $dbh->selectall_arrayref($cmd);
+			$sth->execute($data[1]);
 			while ( my @row = $sth->fetchrow_array()) {
 				$org_id = $row[0]
 			}
@@ -78,12 +55,9 @@ while (<$IN>) {
 		s/^>//;
 		@data = split /\|/;
 		$seq = "";
-		print Dumper \@data;
 	}
 	else {
 		$seq .= $line;
-		print $seq."\n";
 	}
-
 }
 
