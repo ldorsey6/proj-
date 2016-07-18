@@ -65,11 +65,14 @@ if (param('submit')) {
 
 	$select_statement = $select_statement.";";
 
-	my $sth3 = $dbh->prepare($select_statement);
-	$sth3->execute();
-	my $seqID = $sth3->fetchrow_arrray();
-
-	print p("$seqID\n");
+	my $sth4 = $dbh->prepare($select_statement);
+	$sth4->execute();
+	my @seqID = $sth4->fetchrow_arrray();
+	my $output;
+	foreach ( @seqID ) {
+		$output = $output.$_."|"; 
+	}
+	print p($output."\n");
 }
 
 my $url = url();
