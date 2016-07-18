@@ -1,0 +1,15 @@
+1. Write a regular expression that will match a target string consisting only of an integer number. 
+
+^\d+$
+
+2. Write one that will match a string containing only an integer or a decimal number. 
+
+^\d+\.?\d*$
+
+3. Write one that will match a string containing a positive or negative integer or decimal number. 
+
+^-?\d+\.?\d*$
+
+4. Write one that will match a string containing only a positive or negative number in scientific notation (e.g., -3.5e6).
+
+^-?\d\.?\d*e-?\d+$
