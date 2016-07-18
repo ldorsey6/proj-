@@ -23,7 +23,7 @@ if (param('submit')) {
 	my %selects;
 
 
-	my ( $gene, $organism, $tissue, $level, $gene_ID, $organism_ID );
+	my ( $gene, $organism, $tissue, $level, $gene_ID, $organism_ID, $tissue_ID );
 	if ( 'gene' ~~ @input ) {
 		$gene = param('gene');
 		my $sth1 = $dbh->prepare( "SELECT gene_ID FROM gene WHERE gene = $gene;" );
@@ -34,15 +34,27 @@ if (param('submit')) {
 
 	if ( 'organism' ~~ @input ) {
 		$organism = param('organism');
-		my $sth1 = $dbh->prepare( "SELECT organism_ID FROM organism WHERE organism = $organism;" );
-		$sth1->execute();
-		$organism_ID = $sth1->fetchrow_array();
+		my $sth2 = $dbh->prepare( "SELECT organism_ID FROM organism WHERE organism = $organism;" );
+		$sth2->execute();
+		$organism_ID = $sth2->fetchrow_array();
 		$selects{'organism_ID'} = $organism_ID;
 		
 	}
-	my $select_statement = "SELECT seq_ID FROM gene_organism_expression WHERE ";
+	if ( 'tissue' ~~ @input ) {
+		$tissue = param('tissue');
+		my $sth3 = $dbh->prepare( "SELECT tissue_ID FROM tissue WHERE tissue = $tissue;" );
+		$sth3->execute();
+		$tissue_ID = $sth3->fetchrow_array();
+		$selects{'tissue_ID'} = $tissue_ID;	
+	}
+	if ( 'level' ~~ @input ) {
+		$level = param('level');
+		$selects{'level'} = $level;	
+	}
+	
+	my $select_statement = "SELECT * FROM gene_organism_expression JOIN gene_organism WHERE ";
 	my $first_round = 0;
-
+	
 	foreach my $key (keys %selects) {
 		if ($first_round == 1 ) {
 			$select_statement = $select_statement." AND ";
@@ -50,6 +62,7 @@ if (param('submit')) {
 		$select_statement = $select_statement.$key." = ".$selects{$key};
 		$first_round =1;
 	}
+
 	$select_statement = $select_statement.";";
 
 	my $sth3 = $dbh->prepare($select_statement);
