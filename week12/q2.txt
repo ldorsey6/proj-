@@ -1,0 +1,37 @@
+2. Pretend you're developing a database to support an application that helps people with
+comparison shopping when selecting gifts for friends. Generate a data model for this 
+database -- this should include such entities as 'friends', 'gifts', 'retailers', 
+'prices', etc. Once you have generated the data model, write the SQL to create the 
+database tables that implement the data model.
+
+CREATE TABLE friend (
+	friend_ID INTERGER NOT NULL PRIMARY KEY AUTOINCREMEMENT,
+	first_name VARCHAR(255) NOT NULL,
+	last_name VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE retailer (
+	retailer_ID INTERGER NOT NULL PRIMARY KEY AUTOINCREMEMENT,
+	retailer_name VARCHAR(255) NOT NULL,
+);
+
+CREATE TABLE item (
+	item_ID INTERGER NOT NULL PRIMARY KEY AUTOINCREMEMENT,
+	item_name VARCHAR(255) NOT NULL,
+);
+
+CREATE TABLE retailer_item (
+	retailer_item_ID INTERGER NOT NULL PRIMARY KEY AUTOINCREMEMENT,
+	retailer_ID INTERGER NOT NULL,
+	item_ID INTERGER NOT NULL,
+	price INTEGER NOT NULL,
+		FOREIGN KEY (retailer_ID) REFERENCES retailer(retailer_ID),
+		FOREIGN KEY (item_ID) REFERENCES item(item_ID)
+);
+
+CREATE TABLE gift (
+	friend_ID INTERGER NOT NULL,
+	retailer_item_ID INTERGER NOT NULL FOREIGN KEY,
+		FOREIGN KEY (friend_ID) REFERENCES friend(friend_ID),
+		FOREIGN KEY (retailer_item_ID) REFERENCES retailer_item(retailer_item_ID)
+);
